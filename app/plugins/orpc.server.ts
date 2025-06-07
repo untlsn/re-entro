@@ -1,5 +1,4 @@
 import { createRouterClient } from "@orpc/server";
-import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import { router } from "~~/server/orpc";
 
 export default defineNuxtPlugin(() => {
@@ -14,7 +13,7 @@ export default defineNuxtPlugin(() => {
 
   return {
     provide: {
-      orpc: createTanstackQueryUtils(client),
+      orpc: createRouterUtils(client, ["orpc"]),
     },
   };
 });

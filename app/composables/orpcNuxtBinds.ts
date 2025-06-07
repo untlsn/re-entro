@@ -1,24 +1,36 @@
-import type { OperationKey } from "@orpc/tanstack-query";
+import type { ClientContext, NestedClient } from "@orpc/client";
 
 type AsyncDataOptionsTuple<T> = [
   () => string,
-  () => Promise<T>,
+  () => T,
 ];
-
-type AsyncDataOptionsOrpcProcedure<TOutput, TInput = undefined> = {
-  key: (options: { input: TInput }) => OperationKey<"query", TInput>
-  call: (payload: TInput) => Promise<TOutput>
-};
 
 type OptionalPayload<T> = undefined extends T ? [payload?: MaybeRefOrGetter<T>] : [payload: MaybeRefOrGetter<T>];
 
-export function asyncDataOptions<TOutput, TInput>(options: AsyncDataOptionsOrpcProcedure<TOutput, TInput>, ...[payload]: OptionalPayload<TInput>): AsyncDataOptionsTuple<TOutput> {
-  return [
-    () => {
-      const [path, { input }] = options.key({ input: toValue(payload) as TInput });
+type RouterUtilsProcedure<T> = T extends (payload: infer P) => infer R ? {
+  options(...[payload]: OptionalPayload<P>): AsyncDataOptionsTuple<R>
+} : unknown;
 
-      return `ORPC.${path.join(".")} ${input != undefined ? JSON.stringify(input) : ""}`;
+type RouterUtils<T> = {
+  [K in keyof T]: RouterUtils<T[K]>
+} & { key: string[] } & RouterUtilsProcedure<T>;
+
+function saveStringify(value: unknown) {
+  return value == undefined ? "" : JSON.stringify(value);
+}
+
+export function createRouterUtils<T extends NestedClient<ClientContext>>(client: T, path: string[]): RouterUtils<T> {
+  return new Proxy(client, {
+    get(target: any, key) {
+      if (key == "key") return path;
+      if (key == "options") return (payload: any) => [
+        () => {
+          return `${path.join(".")} ${saveStringify(toValue(payload))}`;
+        },
+        () => target(toValue(payload)),
+      ];
+      if (typeof key !== "string") return;
+      return createRouterUtils(target[key], [...path, key]);
     },
-    () => options.call(toValue(payload) as TInput),
-  ];
+  }) as any;
 }

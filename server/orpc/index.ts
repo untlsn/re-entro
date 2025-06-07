@@ -12,5 +12,6 @@ export const router = {
       .handler(({ input }) => {
         // return DB_SERVICE.getConsoleById(input.id);
       }),
+    getPath: baseOs.handler(({ path }) => path),
   },
 };
