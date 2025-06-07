@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@nuxt/image",
     "@nuxt/test-utils",
+    "shadcn-nuxt",
   ],
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],
@@ -19,5 +20,16 @@ export default defineNuxtConfig({
   },
   eslint: {
     config: { stylistic: true },
+  },
+  shadcn: {
+    /**
+     * Prefix for all the imported component
+     */
+    prefix: "Ui",
+    /**
+     * Directory that the component lives in.
+     * @default "./components/ui"
+     */
+    componentDir: "./components/ui",
   },
 });
