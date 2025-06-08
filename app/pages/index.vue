@@ -12,26 +12,31 @@ const { data } = useAsyncData(...$orpc.consoles.getAll.options());
         :key="console.id"
         class="border-1 flex flex-col pt-0 overflow-hidden w-80 mx-auto"
       >
-        <div class="relative">
+        <div class="relative h-50 bg-background-dark/20 p-4 grid place-items-center">
           <NuxtImg
             :src="console.image"
             :alt="console.name"
-            height="200"
-            width="300"
-            class="w-full h-50 object-cover"
+            height="168"
+            class="mx-auto rounded-xl"
           />
-          <div
+          <UiBadge
             v-if="console.outOfStock"
-            class="bg-black/60 text-white px-2 py-1 rounded-lg absolute left-2 top-2 text-sm"
+            class="bg-black/80 absolute text-xl"
           >
             Out of stock
-          </div>
+          </UiBadge>
+          <UiBadge
+            v-if="console.prevPrice"
+            class="absolute top-2 right-2"
+          >
+            Sale
+          </UiBadge>
         </div>
         <UiCardHeader>
           <UiCardDescription class="flex gap-2 mb-2 text-white">
-            <span class="border rounded-full px-2 w-fit">
+            <UiBadge variant="outline">
               {{ console.manufacturer }}
-            </span>
+            </UiBadge>
           </UiCardDescription>
           <UiCardTitle class="text-xl">
             <NuxtLink
